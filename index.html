@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AI生活辞典</title>
+<style>
+  :root{
+    --paper:#F7F1E4;
+    --paper-deep:#EFE6D2;
+    --ink:#2E2A24;
+    --ink-soft:#6B6255;
+    --line:#D8CBB0;
+    --money:#7C8C58;
+    --health:#B5695F;
+    --home:#C89B4A;
+    --ai:#4C6B8A;
+    --rel:#8C6E8C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    padding-bottom:40px;
+  }
+  /* ---- header ---- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:18px 18px 10px;
+    position:sticky;
+    top:0;
+    background:var(--paper);
+    z-index:10;
+    border-bottom:1px solid var(--line);
+  }
+  .backbtn{
+    border:none;
+    background:none;
+    font-size:22px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    padding:4px 8px 4px 0;
+    line-height:1;
+    visibility:hidden;
+  }
+  .backbtn.show{visibility:visible;}
+  .topbar-title{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:.02em;
+  }
+  .topbar-profile{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 12px 5px 9px;
+    white-space:nowrap;
+    background:#fff;
+    cursor:pointer;
+  }
+
+  /* ---- HOME ---- */
+  .home-hero{
+    padding:28px 24px 8px;
+    text-align:center;
+  }
+  .home-hero .icon{font-size:40px;}
+  .home-hero h1{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:26px;
+    margin:8px 0 6px;
+    letter-spacing:.04em;
+  }
+  .home-hero p{
+    color:var(--ink-soft);
+    font-size:13.5px;
+    line-height:1.7;
+    margin:0 auto;
+    max-width:320px;
+  }
+  .profile-banner{
+    margin:18px 18px 0;
+    background:#fff;
+    border:1px dashed var(--line);
+    border-radius:8px;
+    padding:13px 14px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+  }
+  .profile-banner b{color:var(--ink); font-weight:600;}
+  .profile-banner .go{margin-left:auto; font-size:15px;}
+  .tabs{
+    padding:20px 18px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .tab-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 16px 16px 0;
+    cursor:pointer;
+    text-align:left;
+    position:relative;
+    overflow:hidden;
+    transition:transform .12s ease;
+  }
+  .tab-card:active{transform:scale(0.98);}
+  .tab-flag{
+    width:14px;
+    align-self:stretch;
+    border-radius:6px 0 0 6px;
+  }
+  .tab-emoji{font-size:24px;}
+  .tab-body{flex:1;}
+  .tab-title{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:16.5px;
+    font-weight:600;
+  }
+  .tab-count{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .tab-arrow{
+    font-size:16px;
+    color:var(--ink-soft);
+    padding-right:14px;
+  }
+  .home-footnote{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    padding:18px 30px 4px;
+    line-height:1.7;
+  }
+
+  /* ---- LIST ---- */
+  .list-hero{
+    padding:16px 20px 6px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .list-hero .emoji{font-size:26px;}
+  .list-hero h2{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:19px;
+    margin:0;
+  }
+  .list-hint{
+    margin:0 20px 14px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    padding:8px 12px;
+    background:var(--paper-deep);
+    border-radius:6px;
+    line-height:1.6;
+  }
+  .item-list{
+    padding:0 18px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .item-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#fff;
+    border:1px dashed var(--line);
+    border-radius:6px;
+    padding:14px 14px;
+    cursor:pointer;
+  }
+  .item-num{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:14px;
+    color:var(--ink-soft);
+    min-width:20px;
+  }
+  .item-label{
+    flex:1;
+    font-size:14.5px;
+  }
+  .item-go{color:var(--ink-soft);font-size:14px;}
+
+  /* ---- DETAIL (pattern card) ---- */
+  .detail-wrap{padding:14px 20px 10px;}
+  .pattern-card{
+    background:#fffdf8;
+    border:2px dashed var(--card-color, var(--ink-soft));
+    border-radius:10px;
+    padding:22px 18px 20px;
+    position:relative;
+  }
+  .pattern-card::before{
+    content:"✂ きりとり線";
+    position:absolute;
+    top:-11px;
+    left:16px;
+    background:var(--paper);
+    padding:0 8px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    letter-spacing:.05em;
+  }
+  .pattern-tag{
+    display:inline-block;
+    font-size:11px;
+    color:#fff;
+    background:var(--card-color, var(--ink-soft));
+    padding:3px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .pattern-title{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:17px;
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .pattern-body{
+    font-size:14.5px;
+    line-height:1.9;
+    white-space:pre-wrap;
+    color:var(--ink);
+    background:var(--paper-deep);
+    border-radius:8px;
+    padding:14px;
+  }
+  .pattern-body .profile-part{
+    color:var(--card-color, var(--ink-soft));
+    font-weight:600;
+  }
+  .pattern-note{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    line-height:1.7;
+  }
+  .profile-missing{
+    margin-top:12px;
+    font-size:12px;
+    color:var(--card-color, var(--ink-soft));
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+  }
+  .profile-missing .go{margin-left:auto;}
+  .copy-btn{
+    width:100%;
+    margin-top:16px;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:var(--card-color, var(--ink));
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.03em;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .copy-btn:active{opacity:.85;}
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:36px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ink);
+    color:#fff;
+    font-size:13.5px;
+    padding:10px 20px;
+    border-radius:30px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:50;
+    white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .prev-next{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:16px 20px 0;
+  }
+  .nav-btn{
+    flex:1;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:8px;
+    padding:11px;
+    font-size:13px;
+    color:var(--ink);
+    cursor:pointer;
+    text-align:center;
+  }
+  .nav-btn:disabled{opacity:.35;}
+
+  /* ---- PROFILE SCREEN ---- */
+  .profile-wrap{padding:16px 20px 10px;}
+  .profile-intro{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.8;
+    margin-bottom:18px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field input, .field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px 12px;
+    font-size:14.5px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+    resize:none;
+  }
+  .field textarea{min-height:70px; line-height:1.6;}
+  .save-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:var(--ink);
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .save-btn:active{opacity:.85;}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+const DATA = [
+  {
+    id:"money", emoji:"💴", label:"お金", color:"var(--money)",
+    items:[
+      {t:"年金の見込み額を整理する", p:"将来もらえる年金について、以下をふまえて整理してください。\n・現在の年齢：○○歳\n・ねんきん定期便に書かれている年金見込み額：○○円\n・退職予定年齢：○○歳\n年金だけで生活できるかの考え方と、今からできる対策を、専門用語を使わず教えてください。"},
+      {t:"家計を見直す", p:"以下の支出項目をもとに、無理なく減らせる部分を提案してください。\n・家賃/住宅ローン：○○円\n・食費：○○円\n・光熱費：○○円\n・通信費：○○円\n・その他：○○円\n「我慢する節約」ではなく、「仕組みで自然に減る節約」を優先して教えてください。"},
+      {t:"老後資金がいくら必要か整理する", p:"老後に必要な資金がいくらくらいか、以下をふまえてざっくり計算してください。\n・現在の年齢：○○歳\n・退職予定年齢：○○歳\n・現在の貯蓄額：○○円\n・年金以外の収入見込み：○○円\n不安を煽らず、現実的な目安と今からできる対策を教えてください。"},
+      {t:"ふるさと納税を分かりやすく整理する", p:"ふるさと納税をやってみたいですが、仕組みがよく分かりません。以下を初心者向けに説明してください。\n・私の年収：約○○円\n・上限額の目安\n・手続きの流れ(ワンストップ特例含む)\n・注意点\n難しい言葉を使わず、「結局いくら得するのか」を中心に教えてください。"},
+      {t:"確定申告が必要か整理する", p:"確定申告が必要かどうか整理したいです。以下をふまえて教えてください。\n・パート収入：約○○円\n・副業収入：約○○円\n・経費として使ったもの：○○\n確定申告が必要かどうかの判断と、必要な場合の準備の流れを、初心者向けに教えてください。"},
+      {t:"保険を見直す", p:"今入っている保険が自分に合っているか見直したいです。以下をふまえて教えてください。\n・加入している保険の種類：○○\n・月々の保険料：約○○円\n・気になっていること：○○\n見直すときのチェックポイントを、専門用語を使わず教えてください。"},
+      {t:"クレジットカードの使い方を整理する", p:"クレジットカードの使い方を見直したいです。以下をふまえて教えてください。\n・持っているカード：○○枚\n・主な使い道：○○\n・困っていること：○○\nポイントを賢く貯める使い方と、使いすぎを防ぐコツを教えてください。"},
+      {t:"固定費を見直す", p:"毎月の固定費を見直したいです。以下の項目をもとに、削減できそうな部分を提案してください。\n・通信費：○○円\n・サブスク：○○\n・その他固定費：○○円\n無理のない範囲で、削減の優先順位をつけて教えてください。"},
+      {t:"医療費控除を整理する", p:"医療費控除が使えるか整理したいです。以下をふまえて教えてください。\n・1年間の医療費の合計：約○○円\n・家族の医療費も含むか：○○\n対象になるかどうかの考え方と、必要な準備を、初心者向けに教えてください。"},
+      {t:"教育費・親の介護費を整理する", p:"以下について、今のうちに考えておきたいです。\n・子どもの教育費で気になっていること：○○\n・親の介護で気になっていること：○○\n一般的な費用の目安と、今から準備しておくべきことを、専門用語を使わず教えてください。"},
+      {t:"パート収入と扶養の関係を整理する", p:"パート収入が扶養にどう影響するか整理したいです。以下をふまえて教えてください。\n・現在の年収の目安：約○○円\n・配偶者の扶養に入っているか：○○\n年収の壁の考え方と、私の場合どう働くのがいいか、専門用語を使わず教えてください。"},
+      {t:"つみたてNISAを整理する", p:"つみたてNISAを始めるか検討したいです。以下をふまえて教えてください。\n・毎月投資に回せそうな金額：約○○円\n・投資の経験：○○\n50代から始めるメリットと注意点を、専門用語を使わず教えてください。"},
+      {t:"退職金の使い道を整理する", p:"退職金の使い道を考えたいです。以下をふまえて教えてください。\n・退職金の見込み額：約○○円\n・考えている使い道：○○\n使い道の優先順位と、避けたほうがいい使い方を、専門用語を使わず教えてください。"},
+      {t:"電気代・ガス代を節約する", p:"電気代・ガス代を節約したいです。以下をふまえて教えてください。\n・月々の電気代：約○○円\n・月々のガス代：約○○円\n・家族構成：○○\n今日からできる節約方法を、無理なく続けられる形で教えてください。"},
+      {t:"お金の使い方の優先順位を整理する", p:"限られた収入の中で、お金の使い方の優先順位を整理したいです。\n・月の収入：約○○円\n・今かけている主な支出：○○\n・優先したいこと：○○\n何を優先し、何を削るべきか、一緒に整理してください。"},
+      {t:"副業の税金を整理する", p:"副業の収入にかかる税金を整理したいです。以下をふまえて教えてください。\n・副業収入：約○○円\n・副業の内容：○○\n・経費として使ったもの：○○\n何を、いつまでに準備すればいいか、専門用語を使わず教えてください。"},
+      {t:"お金の不安を書き出して整理する", p:"お金のことで漠然とした不安があります。\n・今感じていること：○○(自由に書いてください)\n気持ちを整理して、今できる小さな一歩を一緒に考えてください。"},
+      {t:"携帯・通信費のプランを見直す", p:"携帯電話や通信費のプランを見直したいです。以下をふまえて教えてください。\n・現在の月額：約○○円\n・使っているキャリア：○○\n・データ使用量の目安：○○\n見直すときのチェックポイントを教えてください。"},
+      {t:"お小遣い制・家計の分け方を整理する", p:"家計とお小遣いの分け方を整理したいです。以下をふまえて教えてください。\n・世帯の月収：約○○円\n・現在の分け方(あれば)：○○\n無理なく続けられる分け方の考え方を教えてください。"},
+      {t:"老後の住まいにかかるお金を整理する", p:"老後の住まいにかかるお金について整理したいです。以下をふまえて教えてください。\n・現在の住まい：持ち家/賃貸(○○)\n・今後の希望：○○\n考えるべき費用の項目と、今から準備しておきたいことを教えてください。"}
+    ]
+  },
+  {
+    id:"health", emoji:"💊", label:"健康", color:"var(--health)",
+    items:[
+      {t:"病院で症状を分かりやすく伝える", p:"病院で医師に症状を伝えるのが苦手です。以下の情報から、分かりやすく簡潔に伝えるための説明文を作ってください。\n・症状：○○\n・いつから：○○\n・痛みの程度や特徴：○○\n短い言葉でまとめ、聞かれそうな質問も一緒に予想して教えてください。"},
+      {t:"健康診断の結果を整理する", p:"健康診断の結果票の内容を整理したいです。以下をふまえて教えてください。\n・気になっている数値：○○\n・基準値：○○(分かれば)\nその数値の一般的な見方と、生活習慣で改善できることを、専門用語を使わず教えてください。"},
+      {t:"薬の飲み合わせを整理する", p:"複数の薬を飲んでいて、飲み合わせが心配です。以下をふまえて教えてください。\n・飲んでいる薬：○○\n・気になっていること：○○\nお薬手帳の活用の仕方と、確認すべきポイントを教えてください。"},
+      {t:"次回診察までに聞くことを整理する", p:"次の診察までに、医師に聞いておきたいことを整理したいです。\n・症状・状況：○○\n・気になっていること：○○\n聞くべきことをリストにして、優先順位もつけてください。"},
+      {t:"更年期の症状を整理する", p:"更年期の症状について整理したいです。以下をふまえて教えてください。\n・気になる症状：○○\n・特に困っていること：○○\n日常生活でできるセルフケアの工夫を、無理なく続けられる形で教えてください。"},
+      {t:"睡眠の質を改善する", p:"最近よく眠れません。以下をふまえて教えてください。\n・寝つきや睡眠時間の状況：○○\n・生活リズム(仕事の時間帯など)：○○\n睡眠の質を上げるために今日からできる工夫を教えてください。"},
+      {t:"運動不足を解消する", p:"運動不足を感じています。以下をふまえて教えてください。\n・1日に取れる時間：○○分程度\n・体力に不安な点：○○\n忙しくても続けられる、簡単な運動の工夫を教えてください。"},
+      {t:"健康的な食事を整理する", p:"健康を意識した食事にしたいです。以下をふまえて教えてください。\n・普段の食生活で気になっていること：○○\n・料理にかけられる時間：○○\n忙しくても取り入れやすい工夫を教えてください。"},
+      {t:"腰痛・肩こりを和らげる", p:"腰痛・肩こりに悩んでいます。以下をふまえて教えてください。\n・痛む場所：○○\n・悪化するタイミング：○○\n仕事の合間にできるセルフケアの方法を教えてください。"},
+      {t:"病院選びを整理する", p:"症状に合った病院や診療科を選びたいです。以下をふまえて教えてください。\n・症状：○○\n・住んでいる地域：○○\n診療科の選び方と、病院選びのチェックポイントを教えてください。"},
+      {t:"介護保険の仕組みを整理する", p:"親の介護保険について整理したいです。以下をふまえて教えてください。\n・親の年齢・状況：○○\n・気になっていること：○○\n申請の大まかな流れと、知っておくべきことを、専門用語を使わず教えてください。"},
+      {t:"目の疲れ・老眼を整理する", p:"目の疲れ・老眼が気になります。以下をふまえて教えてください。\n・スマホ・パソコンを使う時間：○○時間程度\n・気になる症状：○○\n目の疲れを軽くする工夫と、対策を教えてください。"},
+      {t:"体重管理を整理する", p:"無理なく体重管理をしたいです。以下をふまえて教えてください。\n・現在気になっていること：○○\n・過去に試したこと：○○\n続けやすい方法を、初心者向けに教えてください。"},
+      {t:"ストレスとの付き合い方を整理する", p:"ストレスを感じることが多いです。以下をふまえて教えてください。\n・ストレスを感じる場面：○○\n・今試していること：○○(あれば)\n気持ちを切り替えるコツと、続けやすいセルフケアを教えてください。"},
+      {t:"予防接種のスケジュールを整理する", p:"予防接種について整理したいです。以下をふまえて教えてください。\n・年齢：○○歳\n・持病の有無：○○\n50代が気にすべき予防接種の種類とタイミングを教えてください。"},
+      {t:"歯の健康を整理する", p:"歯や歯茎の健康が気になります。以下をふまえて教えてください。\n・気になっている症状：○○\n・最後に歯科に行った時期：○○\n日常でできるケアと、歯科に相談すべきタイミングを教えてください。"},
+      {t:"更年期以降の骨の健康を整理する", p:"骨の健康が気になります。以下をふまえて教えてください。\n・気になっていること：○○\n・普段の運動習慣：○○\n更年期以降に気をつけるべきことを、無理なく続けられる形で教えてください。"},
+      {t:"健康食品・サプリの選び方を整理する", p:"サプリメントを試したいです。以下をふまえて教えてください。\n・気になっている不調：○○\n・飲んでいる薬(あれば)：○○\n選ぶときのポイントと、薬との飲み合わせで気をつけることを教えてください。"},
+      {t:"むくみ・冷えを整理する", p:"むくみや冷えが気になります。以下をふまえて教えてください。\n・気になる部位：○○\n・生活習慣で気になること：○○\n日常生活でできる対策を教えてください。"},
+      {t:"健康の不安を書き出して整理する", p:"健康について漠然とした不安があります。\n・今感じていること：○○(自由に書いてください)\n気持ちを整理して、今できる小さな一歩を一緒に考えてください。"}
+    ]
+  },
+  {
+    id:"home", emoji:"🧹", label:"家事", color:"var(--home)",
+    items:[
+      {t:"冷蔵庫の残り物で献立を考える", p:"冷蔵庫に残っている食材で、今日の献立を考えてください。\n・残っている食材：○○(例：卵、キャベツ、豚肉)\n・人数：○○人分\n・希望：○○(例：15分以内で作れる、和食がいい)\n主菜・副菜・汁物のセットで、簡単な作り方も一緒に教えてください。"},
+      {t:"1週間分の献立と買い物リストを考える", p:"1週間分の献立を考えてください。\n・人数：○○人分\n・希望・避けたい食材：○○\n・予算感：約○○円\n栄養バランスの良い献立と、必要な買い物リストを提案してください。"},
+      {t:"掃除の計画を立てる", p:"掃除を継続する計画を立てたいです。\n・家の広さ・間取り：○○\n・特に苦手な場所：○○\n毎日・週1回・月1回に分けた、無理なく続けられる計画を教えてください。"},
+      {t:"収納・片付けのアイデアを考える", p:"収納・片付けのアイデアが欲しいです。\n・片付けたい場所：○○\n・物が増えがちなもの：○○\n初心者でも続けられる、シンプルな収納の工夫を教えてください。"},
+      {t:"家族の予定・タスクを整理する", p:"家族の予定やタスクを整理したいです。\n・家族構成：○○\n・把握しきれていないこと：○○\n分かりやすく整理する方法と、共有しやすい仕組みを提案してください。"},
+      {t:"洗濯の効率を上げる", p:"洗濯の手間を減らしたいです。\n・家族の人数：○○人\n・洗濯の頻度：○○\n・困っていること：○○\n効率よく進める工夫を教えてください。"},
+      {t:"作り置きのメニューを考える", p:"週末にまとめて作り置きをしたいです。\n・人数：○○人分\n・好み・避けたい食材：○○\n平日に助かる作り置きメニューを3つ、日持ちさせるコツと一緒に教えてください。"},
+      {t:"食材を無駄なく使い切る", p:"食材を余らせてしまうことが多いです。\n・よく余らせる食材：○○\n・買い物の頻度：○○\n無駄なく使い切るための工夫を教えてください。"},
+      {t:"キッチンの掃除・手入れを整理する", p:"キッチンの掃除方法を整理したいです。\n・気になっている汚れ：○○\n・掃除にかけられる時間：○○\n効率よくきれいにする方法と、汚れをためない習慣を教えてください。"},
+      {t:"衣替え・季節の片付けを整理する", p:"衣替えや季節の片付けをスムーズに進めたいです。\n・収納スペースの広さ：○○\n・困っていること：○○\n手間を減らす進め方と、処分するかどうかの判断基準を教えてください。"},
+      {t:"来客時のおもてなし準備を考える", p:"来客があるときの準備をスムーズに進めたいです。\n・来客の人数・関係性：○○\n・来客までの時間：○○\n段取りよく進めるための準備リストを作ってください。"},
+      {t:"お弁当のメニューを考える", p:"お弁当のメニューを考えたいです。\n・人数：○○人分\n・好み・避けたい食材：○○\n手早く作れて栄養バランスの良いメニューを3つ提案してください。"},
+      {t:"掃除道具・洗剤を整理する", p:"掃除道具や洗剤を整理したいです。\n・今持っている道具・洗剤：○○\n・困っていること：○○\n場所別に必要な道具・洗剤と、整理・収納のコツを教えてください。"},
+      {t:"ゴミの分別・処分方法を整理する", p:"ゴミの分別・処分方法を整理したいです。\n・迷っている品目：○○\n・住んでいる地域：○○\n分別の考え方と、粗大ゴミ・不用品の処分方法を教えてください。"},
+      {t:"家計簿・レシート管理を整理する", p:"レシートや家計簿の管理を続けたいです。\n・今までの管理方法：○○\n・続かない理由：○○\n無理なく続けられる管理方法を教えてください。"},
+      {t:"庭・ベランダの手入れを考える", p:"庭やベランダの植物の手入れを整理したいです。\n・育てている植物：○○\n・かけられる時間：○○\n無理なく続けられるお手入れの工夫を教えてください。"},
+      {t:"季節の行事の準備を整理する", p:"季節の行事の準備を早めに進めたいです。\n・行事：○○(例：お正月、お盆)\n・毎年困っていること：○○\n早めに準備を進めるためのリストを作ってください。"},
+      {t:"日用品のストック管理を整理する", p:"日用品のストック管理をしたいです。\n・買い忘れ・買いすぎが多いもの：○○\n・収納スペース：○○\nストックを管理する簡単な仕組みを教えてください。"},
+      {t:"家事の分担を考える", p:"家族との家事分担を見直したいです。\n・家族構成：○○\n・今の分担で不満なこと：○○\n無理なく続けられる分担の決め方と、話し合うときのコツを教えてください。"},
+      {t:"来客用の部屋の整え方を考える", p:"来客の前に部屋を手早く整えたいです。\n・部屋の状況：○○\n・来客までの時間：○○\n効率よく片付けるコツを教えてください。"}
+    ]
+  },
+  {
+    id:"ai", emoji:"🖥️", label:"AI活用", color:"var(--ai)",
+    items:[
+      {t:"Instagram投稿文を作る", p:"Instagramの投稿文を作りたいです。\n・テーマ：○○\n・伝えたいこと：○○\n共感されやすく、行動につながる投稿文を考えてください。"},
+      {t:"リールの台本を作る", p:"Instagramリール動画の台本を作りたいです。\n・テーマ：○○\n・尺の目安：15秒〜30秒\n話し言葉で親しみやすい台本を、冒頭で興味を引く一言から作ってください。"},
+      {t:"ChatGPTの基本的な使い方を整理する", p:"ChatGPT(またはAIチャット)を初めて使います。\n・使ってみたいこと：○○\n基本的な使い方と、活用例を初心者向けに教えてください。"},
+      {t:"Canvaでチラシ・画像を作る", p:"Canvaで簡単なチラシや画像を作りたいです。\n・作りたいもの：○○\n・使う場面：○○\n初心者向けの手順を教えてください。"},
+      {t:"画像生成AIの使い方を整理する", p:"画像生成AIを使ってみたいです。\n・作りたい画像のイメージ：○○\n基本的な使い方と、イメージ通りの画像を作るコツを教えてください。"},
+      {t:"noteの記事構成を作る", p:"noteの記事を書きたいです。\n・テーマ：○○\n・伝えたいこと：○○\n読みやすい記事の構成案と、タイトル案を3つ作ってください。"},
+      {t:"AIに写真の説明文を作ってもらう", p:"この写真の内容を説明する文章を作ってください。(写真を添付して使ってください)\n・使う場面：○○(例：SNS投稿、商品説明)\n短いバージョンと長いバージョンの両方を作ってください。"},
+      {t:"AIに商品説明文を作ってもらう", p:"ハンドメイド作品の商品説明文を作りたいです。\n・作品の特徴：○○\n・サイズ・素材：○○\n魅力が伝わる説明文を作ってください。"},
+      {t:"AIで音声入力・文字起こしをする", p:"話した内容を文字にしたいです。\n・使いたい場面：○○\n音声入力・文字起こしの基本的な使い方を、初心者向けに教えてください。"},
+      {t:"AIで動画編集の基本を整理する", p:"スマホで簡単な動画編集をしたいです。\n・作りたい動画：○○\n初心者向けの動画編集の基本と、おすすめアプリを教えてください。"},
+      {t:"AIツールの選び方を整理する", p:"自分に合ったAIツールを選びたいです。\n・やりたいこと：○○\n・パソコン・スマホどちらで使うか：○○\n目的別のおすすめの選び方を教えてください。"},
+      {t:"AIに相談しながらアイデア出しをする", p:"新しい企画やアイデアを考えたいです。\n・テーマ：○○\n・目的：○○\nアイデアを5つ提案し、それぞれのメリット・デメリットも教えてください。"},
+      {t:"AIでハッシュタグを考える", p:"Instagram投稿に付けるハッシュタグを考えてください。\n・テーマ：○○\n・ターゲット：○○\n関連性の高いハッシュタグを10個程度、大小のバランスも考えて提案してください。"},
+      {t:"AIでプロフィール文を作る", p:"SNSのプロフィール文を作りたいです。\n・自分の特徴・活動内容：○○\n・伝えたい印象：○○\n魅力が伝わるプロフィール文を3パターン作ってください。"},
+      {t:"AIで文章の言い換え・添削をする", p:"以下の文章を、より分かりやすく自然な表現に直してください。\n・直したい文章：○○\n・希望のトーン：○○(例：親しみやすく、丁寧に)\n分かりやすく教えてください。"},
+      {t:"AIでリサーチ・情報収集をする", p:"以下のテーマについて調べたいです。\n・テーマ：○○\n・知りたいポイント：○○\n分かりやすくまとめて教えてください。"},
+      {t:"AIでイベント告知文を作る", p:"イベントの告知文を作ってください。\n・イベント内容：○○\n・日時・場所：○○\n魅力が伝わる告知文を作ってください。"},
+      {t:"AIで自己紹介動画の台本を作る", p:"自己紹介動画の台本を作りたいです。\n・自分の活動内容：○○\n・動画の長さ：○○\n親しみやすい自己紹介の台本を作ってください。"},
+      {t:"AIでよくある質問への回答文を作る", p:"お客様からよくある質問への回答文を作りたいです。\n・質問内容：○○\n・希望のトーン：○○\n丁寧で分かりやすい回答文を作ってください。"},
+      {t:"AIで年間の発信ネタを考える", p:"SNS発信のネタが尽きてしまいました。\n・発信しているジャンル：○○\n・投稿頻度：○○\n1ヶ月分の投稿ネタのアイデアを、カレンダー形式で提案してください。"}
+    ]
+  },
+  {
+    id:"rel", emoji:"🧑‍🤝‍🧑", label:"人間関係", color:"var(--rel)",
+    items:[
+      {t:"LINEの返信を考える", p:"LINEにどう返信すればいいか迷っています。\n・相手：○○\n・来たメッセージ内容：○○\n感じの良い返信文を3パターン考えてください。"},
+      {t:"お詫び・お断りの文章を作る", p:"お詫びまたはお断りの連絡をしたいです。\n・相手：○○\n・状況：○○\n角が立たない伝え方を考えてください。"},
+      {t:"ちょっとした文章に困ったときに相談する", p:"ちょっとした文章の書き方に困っています。\n・場面：○○\n・伝えたいこと：○○\n自然で感じの良い言い回しを一緒に考えてください。"},
+      {t:"ご近所付き合いの挨拶文を考える", p:"ご近所への挨拶文を考えたいです。\n・状況：○○(例：引っ越し、日頃のお礼)\n丁寧で親しみやすい文章を作ってください。"},
+      {t:"孫との会話のきっかけを考える", p:"孫(または子ども・若い世代)との会話のきっかけが欲しいです。\n・相手の年齢：○○\n・最近の様子で知っていること：○○\n自然に話が弾む話題を5つ考えてください。"},
+      {t:"友人との誘い方・声かけを考える", p:"友人を誘いたいです。\n・相手：○○\n・誘いたいこと：○○\n気軽に誘える声かけの文章を考えてください。"},
+      {t:"義理の家族との付き合い方を考える", p:"義理の家族との付き合い方で悩んでいます。\n・相手：○○\n・状況：○○\n良い関係を保つための考え方を教えてください。"},
+      {t:"お店・サービスへの問い合わせを考える", p:"お店やサービスに問い合わせをしたいです。\n・問い合わせ内容：○○\n丁寧で分かりやすい問い合わせ文を作ってください。"},
+      {t:"クレーム対応の返信を考える", p:"お客様からのクレームに返信する必要があります。\n・クレーム内容：○○\n丁寧で誠実な返信文を考えてください。"},
+      {t:"久しぶりに連絡する相手への文章を考える", p:"しばらく連絡していなかった相手に連絡を取りたいです。\n・相手：○○\n・連絡したい理由：○○\n気軽で自然な連絡文を考えてください。"},
+      {t:"誕生日・記念日のメッセージを考える", p:"誕生日(または記念日)にお祝いメッセージを送りたいです。\n・相手：○○\n・関係性：○○\n心のこもった文章を3パターン考えてください。"},
+      {t:"お礼状・感謝の手紙を書く", p:"お世話になった人へのお礼状を書きたいです。\n・相手：○○\n・お世話になった内容：○○\n感謝の気持ちが伝わる文章を考えてください。"},
+      {t:"習い事・サークルでの自己紹介を考える", p:"新しい習い事やサークルでの自己紹介を考えたいです。\n・活動内容：○○\n・話せる時間の目安：○○\n親しみやすい自己紹介文を作ってください。"},
+      {t:"グループLINEでの発言を考える", p:"グループLINEでの発言に気を使います。\n・グループの雰囲気：○○\n・伝えたい内容：○○\n感じの良い発言内容を考えてください。"},
+      {t:"体調不良を伝える連絡文を作る", p:"体調不良で予定を欠席することを伝えたいです。\n・相手：○○\n・欠席する予定：○○\n丁寧で簡潔な連絡文を作ってください。"},
+      {t:"褒め言葉・励ましの言葉を考える", p:"相手を励ましたい、褒めたいです。\n・相手：○○\n・状況：○○\n押し付けがましくならない、気持ちが伝わる言葉を3つ考えてください。"},
+      {t:"意見が違う相手への伝え方を考える", p:"自分と意見が違う相手に自分の考えを伝えたいです。\n・相手：○○\n・状況：○○\n角が立たない伝え方を考えてください。"},
+      {t:"SNSでのコメント返信を考える", p:"SNSでもらったコメントへの返信を考えたいです。\n・コメント内容：○○\n感じの良い返信文を考えてください。"},
+      {t:"初対面の人との会話のきっかけを考える", p:"初対面の人と話すときの話題が欲しいです。\n・場面：○○\n・相手について知っていること：○○\n自然に会話が広がるきっかけを5つ考えてください。"},
+      {t:"人間関係の悩みを書き出して整理する", p:"人間関係で感じているモヤモヤを整理したいです。\n・今感じていること：○○(自由に書いてください)\n気持ちを整理して、今できる小さな一歩を一緒に考えてください。"}
+    ]
+  }
+];
+let state = {screen:"home", cat:null, idx:0, prevScreen:"home"};
+let profile = {age:"", job:"", sidejob:"", memo:""};
+let profileLoaded = false;
+
+async function loadProfile(){
+  try{
+    const raw = localStorage.getItem("ai_seikatsu_jiten_profile");
+    if(raw){
+      const v = JSON.parse(raw);
+      profile = Object.assign(profile, v);
+    }
+  }catch(e){ /* no profile saved yet, or storage blocked */ }
+  profileLoaded = true;
+  render();
+}
+
+async function saveProfile(newProfile){
+  profile = newProfile;
+  try{
+    localStorage.setItem("ai_seikatsu_jiten_profile", JSON.stringify(profile));
+  }catch(e){ /* ignore storage failure, still usable this session */ }
+}
+
+function hasProfile(){
+  return !!(profile.age || profile.job || profile.sidejob || profile.memo);
+}
+
+function buildProfileIntro(){
+  const parts = [];
+  if(profile.age || profile.job){
+    let line = "私は";
+    if(profile.age) line += profile.age;
+    if(profile.job) line += (profile.age?"、":"") + profile.job + "をしています。";
+    else line += "です。";
+    parts.push(line);
+  }
+  if(profile.sidejob) parts.push("副業・活動として" + profile.sidejob + "もしています。");
+  if(profile.memo) parts.push(profile.memo);
+  return parts.join("");
+}
+
+function render(){
+  const app = document.getElementById("app");
+  if(!profileLoaded){ app.innerHTML = ""; return; }
+  if(state.screen==="home") app.innerHTML = renderHome();
+  else if(state.screen==="list") app.innerHTML = renderList();
+  else if(state.screen==="detail") app.innerHTML = renderDetail();
+  else app.innerHTML = renderProfileScreen();
+}
+
+function profilePill(){
+  const label = hasProfile() ? "👤 マイ情報" : "👤 マイ情報を登録";
+  return `<div class="topbar-profile" onclick="goProfile()">${label}</div>`;
+}
+
+function renderHome(){
+  const tabs = DATA.map(c=>`
+    <div class="tab-card" onclick="goList('${c.id}')">
+      <div class="tab-flag" style="background:${c.color}"></div>
+      <div class="tab-emoji">${c.emoji}</div>
+      <div class="tab-body">
+        <div class="tab-title">${c.label}</div>
+        <div class="tab-count">${c.items.length}個のプロンプト</div>
+      </div>
+      <div class="tab-arrow">›</div>
+    </div>`).join("");
+
+  const banner = hasProfile()
+    ? `<div class="profile-banner" onclick="goProfile()">👤 <span><b>${escapeHtml(profile.age||"")} ${escapeHtml(profile.job||"")}</b> の情報でプロンプトを自動作成します</span><span class="go">›</span></div>`
+    : `<div class="profile-banner" onclick="goProfile()">👤 <span>あなたの情報を登録すると、プロンプトに<b>自動で書き込まれます</b></span><span class="go">›</span></div>`;
+
+  return `
+    <div class="topbar">
+      <button class="backbtn">‹</button>
+      <div class="topbar-title">AI生活辞典</div>
+      ${profilePill()}
+    </div>
+    <div class="home-hero">
+      <div class="icon">📚</div>
+      <h1>AI生活辞典</h1>
+      <p>困ったことを選んで、プロンプトをきりとって使うだけ。<br>今日からつかえるAI活用辞典です。</p>
+    </div>
+    ${banner}
+    <div class="tabs">${tabs}</div>
+    <div class="home-footnote">プロンプト中の「○○」の部分は、その時の状況に合わせて書きかえて使ってください</div>
+  `;
+}
+
+function renderList(){
+  const cat = DATA.find(c=>c.id===state.cat);
+  const rows = cat.items.map((it,i)=>`
+    <div class="item-row" onclick="goDetail(${i})">
+      <div class="item-num">${toCircled(i+1)}</div>
+      <div class="item-label">${it.t}</div>
+      <div class="item-go">›</div>
+    </div>`).join("");
+  return `
+    <div class="topbar">
+      <button class="backbtn show" onclick="goHome()">‹</button>
+      <div class="topbar-title">${cat.label}</div>
+      ${profilePill()}
+    </div>
+    <div class="list-hero"><div class="emoji">${cat.emoji}</div><h2>${cat.label}</h2></div>
+    <div class="list-hint">使いたいプロンプトをタップすると、全文とコピーボタンが見られます</div>
+    <div class="item-list">${rows}</div>
+  `;
+}
+
+function renderDetail(){
+  const cat = DATA.find(c=>c.id===state.cat);
+  const it = cat.items[state.idx];
+  const hasPrev = state.idx>0, hasNext = state.idx<cat.items.length-1;
+  const intro = buildProfileIntro();
+  const bodyHtml = intro
+    ? `<span class="profile-part">${escapeHtml(intro)}</span>\n\n${escapeHtml(it.p)}`
+    : escapeHtml(it.p);
+  const missingNote = hasProfile()
+    ? ""
+    : `<div class="profile-missing" onclick="goProfile()">👤 マイ情報を登録すると、この文章の前にあなたの状況が自動で入ります<span class="go">›</span></div>`;
+
+  return `
+    <div class="topbar">
+      <button class="backbtn show" onclick="goList('${cat.id}')">‹</button>
+      <div class="topbar-title">${cat.label}</div>
+      ${profilePill()}
+    </div>
+    <div class="detail-wrap">
+      <div class="pattern-card" style="--card-color:${cat.color}">
+        <span class="pattern-tag">${cat.label} ${toCircled(state.idx+1)}</span>
+        <div class="pattern-title">${it.t}</div>
+        <div class="pattern-body" id="promptText">${bodyHtml}</div>
+        <div class="pattern-note">「○○」の部分はご自身の状況に書きかえてから、AIチャットに貼りつけてください</div>
+        ${missingNote}
+        <button class="copy-btn" style="--card-color:${cat.color}" onclick="copyPrompt()">✂️ きりとって使う（コピー）</button>
+      </div>
+    </div>
+    <div class="prev-next">
+      <button class="nav-btn" ${hasPrev?"":"disabled"} onclick="shift(-1)">‹ 前の項目</button>
+      <button class="nav-btn" ${hasNext?"":"disabled"} onclick="shift(1)">次の項目 ›</button>
+    </div>
+  `;
+}
+
+function renderProfileScreen(){
+  return `
+    <div class="topbar">
+      <button class="backbtn show" onclick="goBackFromProfile()">‹</button>
+      <div class="topbar-title">マイ情報</div>
+    </div>
+    <div class="profile-wrap">
+      <div class="profile-intro">ここに登録した情報は、プロンプトの前に自動で差し込まれます。空欄のままでもOKです。</div>
+      <div class="field">
+        <label>年代</label>
+        <input id="f-age" type="text" placeholder="例：50代" value="${escapeAttr(profile.age)}">
+      </div>
+      <div class="field">
+        <label>本業・お仕事</label>
+        <input id="f-job" type="text" placeholder="例：パン屋のパート勤務" value="${escapeAttr(profile.job)}">
+      </div>
+      <div class="field">
+        <label>副業・活動していること</label>
+        <input id="f-sidejob" type="text" placeholder="例：ライブバー運営、洋服リメイク" value="${escapeAttr(profile.sidejob)}">
+      </div>
+      <div class="field">
+        <label>その他、伝えておきたいこと(自由記入)</label>
+        <textarea id="f-memo" placeholder="例：パソコンや数字の管理が苦手です">${escapeHtml(profile.memo)}</textarea>
+      </div>
+      <button class="save-btn" onclick="onSaveProfile()">保存する</button>
+    </div>
+  `;
+}
+
+function toCircled(n){
+  const circ = "①②③④⑤⑥⑦⑧⑨⑩";
+  return circ[n-1] || (n+"");
+}
+function escapeHtml(s){
+  return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function escapeAttr(s){
+  return escapeHtml(s).replace(/"/g,"&quot;");
+}
+
+function goHome(){ state = {screen:"home", cat:null, idx:0}; render(); window.scrollTo(0,0); }
+function goList(id){ state = {screen:"list", cat:id, idx:0}; render(); window.scrollTo(0,0); }
+function goDetail(i){ state.screen="detail"; state.idx=i; render(); window.scrollTo(0,0); }
+function shift(d){ state.idx += d; render(); window.scrollTo(0,0); }
+function goProfile(){
+  state.prevScreen = state.screen;
+  state.screen = "profile";
+  render();
+  window.scrollTo(0,0);
+}
+function goBackFromProfile(){
+  state.screen = state.prevScreen || "home";
+  render();
+  window.scrollTo(0,0);
+}
+async function onSaveProfile(){
+  const newProfile = {
+    age: document.getElementById("f-age").value.trim(),
+    job: document.getElementById("f-job").value.trim(),
+    sidejob: document.getElementById("f-sidejob").value.trim(),
+    memo: document.getElementById("f-memo").value.trim()
+  };
+  await saveProfile(newProfile);
+  const t = document.getElementById("toast");
+  t.textContent = "保存しました";
+  t.classList.add("show");
+  setTimeout(()=>{ t.classList.remove("show"); t.textContent="コピーしました"; }, 1400);
+  goBackFromProfile();
+}
+
+function copyPrompt(){
+  const cat = DATA.find(c=>c.id===state.cat);
+  const it = cat.items[state.idx];
+  const intro = buildProfileIntro();
+  const text = intro ? (intro + "\n\n" + it.p) : it.p;
+  const finish = ()=>{
+    const t = document.getElementById("toast");
+    t.textContent = "コピーしました";
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 1600);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(finish).catch(()=>{fallbackCopy(text); finish();});
+  } else {
+    fallbackCopy(text); finish();
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+loadProfile();
+</script>
+</body>
+</html>
