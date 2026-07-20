@@ -1,11 +1,11 @@
-const CACHE_NAME = "ai-jiten-v1";
+const CACHE_NAME = "ai-jiten-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/icon-192-v2.png",
+  "./icons/icon-512-v2.png",
+  "./icons/apple-touch-icon-v2.png"
 ];
 
 self.addEventListener("install", (event) => {
