@@ -1,4 +1,4 @@
-const CACHE_NAME = "ai-jiten-v2";
+const CACHE_NAME = "ai-jiten-v3";
 const ASSETS = [
   "./",
   "./index.html",
