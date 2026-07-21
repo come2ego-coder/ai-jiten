@@ -379,6 +379,11 @@
     color:var(--ink-soft);
     margin-bottom:6px;
   }
+  .field-hint{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
   .field input, .field textarea{
     width:100%;
     border:1px solid var(--line);
@@ -575,21 +580,30 @@ async function saveProfile(newProfile){
   }catch(e){ /* ignore storage failure, still usable this session */ }
 }
 
+const EMPTY_WORDS = ["なし","無し","特になし","特にない","特にありません","無"];
+function isFilled(v){
+  if(!v) return false;
+  const trimmed = v.trim();
+  return !!trimmed && !EMPTY_WORDS.includes(trimmed);
+}
+
 function hasProfile(){
-  return !!(profile.age || profile.job || profile.sidejob || profile.memo);
+  return isFilled(profile.age) || isFilled(profile.job) || isFilled(profile.sidejob) || isFilled(profile.memo);
 }
 
 function buildProfileIntro(){
   const parts = [];
-  if(profile.age || profile.job){
+  const age = isFilled(profile.age) ? profile.age : "";
+  const job = isFilled(profile.job) ? profile.job : "";
+  if(age || job){
     let line = "私は";
-    if(profile.age) line += profile.age;
-    if(profile.job) line += (profile.age?"、":"") + profile.job + "をしています。";
+    if(age) line += age;
+    if(job) line += (age?"、":"") + job + "をしています。";
     else line += "です。";
     parts.push(line);
   }
-  if(profile.sidejob) parts.push("副業・活動として" + profile.sidejob + "もしています。");
-  if(profile.memo) parts.push(profile.memo);
+  if(isFilled(profile.sidejob)) parts.push("副業・活動として" + profile.sidejob + "もしています。");
+  if(isFilled(profile.memo)) parts.push(profile.memo);
   return parts.join("");
 }
 
@@ -619,8 +633,10 @@ function renderHome(){
       <div class="tab-arrow">›</div>
     </div>`).join("");
 
+  const bannerAge = isFilled(profile.age) ? profile.age : "";
+  const bannerJob = isFilled(profile.job) ? profile.job : "";
   const banner = hasProfile()
-    ? `<div class="profile-banner" onclick="goProfile()">👤 <span><b>${escapeHtml(profile.age||"")} ${escapeHtml(profile.job||"")}</b> の情報でプロンプトを自動作成します</span><span class="go">›</span></div>`
+    ? `<div class="profile-banner" onclick="goProfile()">👤 <span><b>${escapeHtml(bannerAge)} ${escapeHtml(bannerJob)}</b> の情報でプロンプトを自動作成します</span><span class="go">›</span></div>`
     : `<div class="profile-banner" onclick="goProfile()">👤 <span>あなたの情報を登録すると、プロンプトに<b>自動で書き込まれます</b></span><span class="go">›</span></div>`;
 
   return `
@@ -712,7 +728,7 @@ function renderProfileScreen(){
       <div class="topbar-title">マイ情報</div>
     </div>
     <div class="profile-wrap">
-      <div class="profile-intro">ここに登録した情報は、プロンプトの前に自動で差し込まれます。空欄のままでもOKです。</div>
+      <div class="profile-intro">ここに登録した情報は、プロンプトの前に自動で差し込まれます。あてはまるものがない場合は、「なし」と書かずに空欄のままにしてください。</div>
       <div class="field">
         <label>年代</label>
         <input id="f-age" type="text" placeholder="例：50代" value="${escapeAttr(profile.age)}">
@@ -720,10 +736,12 @@ function renderProfileScreen(){
       <div class="field">
         <label>本業・お仕事</label>
         <input id="f-job" type="text" placeholder="例：パン屋のパート勤務" value="${escapeAttr(profile.job)}">
+        <div class="field-hint">していない場合は空欄でOK</div>
       </div>
       <div class="field">
         <label>副業・活動していること</label>
         <input id="f-sidejob" type="text" placeholder="例：ライブバー運営、洋服リメイク" value="${escapeAttr(profile.sidejob)}">
+        <div class="field-hint">していない場合は空欄でOK</div>
       </div>
       <div class="field">
         <label>その他、伝えておきたいこと(自由記入)</label>
